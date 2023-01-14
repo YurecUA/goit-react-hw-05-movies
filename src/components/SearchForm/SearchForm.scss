@@ -1,0 +1,44 @@
+.search-form {
+  display: flex;
+  justify-content: center;
+
+  padding: 15px;
+
+  .form-input {
+    padding: 5px;
+    margin-right: 5px;
+    width: 60%;
+    max-width: 60%;
+  }
+  .form-btn {
+    text-decoration: none;
+    display: inline-block;
+    color: rgb(238, 238, 238);
+    font-weight: 700;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-family: 'Montserrat', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    background-image: linear-gradient(
+      to right,
+      #ef9e9e 0%,
+      #950000 51%,
+      #faffb6 100%
+    );
+    background-size: 200% auto;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    transition: 0.5s;
+
+    &:hover {
+      cursor: pointer;
+      background-image: linear-gradient(
+        to right,
+        #ee8860 0%,
+        #a10000 51%,
+        #56ad9f 100%
+      );
+      transform: scale(1.03);
+    }
+  }
+}
