@@ -1,60 +1,45 @@
-import { Switch, Route } from 'react-router-dom';
-import React, { lazy, Suspense } from 'react';
-import { QueryClient, QueryClientProvider } from 'react-query';
-
-import Container from './components/Container';
-import Appbar from './components/Appbar';
-import Preloader from './components/Preloader/Preloader';
-import './components/WebsitePreloader/WebsitePreloader';
+import { Route, Switch } from 'react-router-dom';
+import Navigation from './components/Navigation/Navigation';
+import { lazy, Suspense } from 'react';
+import Container from './components/Container/Container';
+import Loader from 'components/Loader/Loader';
 
 const HomePage = lazy(() =>
-  import('./pages/HomePage.jsx'),
+  import('./pages/HomePage' /* webpackChunkName:"HomePage" */)
 );
 const MoviesPage = lazy(() =>
-  import('./pages/MoviesPage.jsx'),
+  import('./pages/MoviesPage' /* webpackChunkName:"MoviesPage" */)
 );
-
 const MovieDetailsPage = lazy(() =>
   import(
-    './pages/MovieDetailsPage.jsx'
-  ),
+    './pages/MovieDetailsPage' /* webpackChunkName:"MovieDetailsPage" */
+  )
+);
+const NotFoundView = lazy(() =>
+  import('./pages/NotFoundView' /* webpackChunkName:"NotFoundView" */)
 );
 
-const queryClient = new QueryClient();
-
-function App() {
+export default function App() {
   return (
-    <>
-      <Appbar />
-      <Container>
-        <Suspense fallback={<Preloader />}>
-          <Switch>
-            <Route path="/" exact>
-              <QueryClientProvider client={queryClient}>
-                <HomePage />
-              </QueryClientProvider>
-            </Route>
+    <Container>
+      <Navigation />
+      <Suspense fallback={<Loader />}>
+        <Switch>
+          <Route exact path="/">
+            <HomePage />
+          </Route>
+          <Route exact path="/movies">
+            <MoviesPage />
+          </Route>
+          <Route path="/movies/:movieId">
+            <MovieDetailsPage />
+          </Route>
 
-            <Route path="/movies" exact>
-              <MoviesPage />
-            </Route>
-
-            <Route path="/movies/:movieId">
-              <MovieDetailsPage />
-            </Route>
-
-            <Route path="/:movieId">
-              <MovieDetailsPage />
-            </Route>
-
-            <Route>
-              <HomePage />
-            </Route>
-          </Switch>
-        </Suspense>
-      </Container>
-    </>
+          <Route>
+            <NotFoundView path="*" />
+          </Route>
+        </Switch>
+      </Suspense>
+    </Container>
   );
 }
-
-export default App;
