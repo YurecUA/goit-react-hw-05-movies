@@ -1,86 +1,103 @@
-import { useState, useEffect, useRef, lazy, Suspense } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
-import SearchForm from '../components/SearchForm/SearchForm';
-import * as MoviesAPI from '../services/MoviesApi';
-import Preloader from '../components/Preloader/Preloader';
+import styles from './MoviesPage.module.css';
 
-const MoviesList = lazy(() =>
-  import('../components/MoviesList/MoviesList'),
-);
+import { useState, useEffect } from 'react';
+import { getMovieByQuery } from '../services/MoviesApi';
+import { Link, useLocation, useHistory } from 'react-router-dom';
+import Notiflix from 'notiflix';
 
-const PaginationList = lazy(
-  () =>
-    import('../components/PaginationList/PaginationList'),
-);
-
-export default function MoviesPage() {
-  const history = useHistory();
-  const location = useLocation();
-  const searchURL = new URLSearchParams(location.search).get('query') ?? '';
-  const currentPage = new URLSearchParams(location.search).get('page') ?? 1;
-
+const MoviesPage = () => {
+  const [movieToFind, setMovieToFind] = useState('');
   const [movies, setMovies] = useState([]);
-  const [page, setPage] = useState(currentPage);
-  const [query, setQuery] = useState('');
-  const isFirstRender = useRef(true);
-  const [totalPages, setTotalPages] = useState(0);
+
+  const location = useLocation();
+  const history = useHistory();
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
+    const searchString = new URLSearchParams(location.search).get('query');
+
+    if (searchString) {
+      const getMovies = async () => {
+        const { results } = await getMovieByQuery(searchString);
+
+        setMovies(results);
+        setMovieToFind(searchString);
+
+        console.log(searchString);
+      };
+
+      getMovies();
     }
+  }, [location.search]);
 
-    MoviesAPI.fetchMoviesBySearch(page, query).then(data => {
-      setMovies(data.results);
-      setTotalPages(data.total_pages);
-    });
-  }, [page, query]);
+  const handleSubmit = async e => {
+    e.preventDefault();
 
-  useEffect(() => {
-    if (searchURL === '') {
-      return;
+    if (movieToFind.trim()) {
+      const { results } = await getMovieByQuery(movieToFind);
+
+      setMovies(results);
+      setMovieToFind('');
+
+      if (results.length === 0) {
+        Notiflix.Notify.warning(
+          'No movies found! Please change your request and try again'
+        );
+      }
+
+      history.push({
+        ...location,
+        search: `query=${movieToFind}`,
+      });
     }
-
-    setQuery(searchURL);
-  }, [searchURL]);
-
-  const setHistory = (query, value = 1) => {
-    history.push({ ...location, search: `query=${query}&page=${value}` });
-  };
-
-  const handleChange = (event, value) => {
-    setPage(value);
-    setHistory(query, value);
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  };
-
-  const handleFormSubmit = input => {
-    if (query === input) {
-      return;
-    }
-
-    setQuery(input);
-    setHistory(input);
   };
 
   return (
-    <div>
-      <SearchForm onSubmit={handleFormSubmit} />
-
-      <Suspense fallback={<Preloader />}>
-        <MoviesList movies={movies} url="movies/" />
-
-        <PaginationList
-          movies={movies}
-          totalPages={totalPages}
-          page={Number(page)}
-          handleChange={handleChange}
-        />
-      </Suspense>
-    </div>
+    <>
+      <header className={styles.searchbar}>
+        <form className={styles.searchForm} onSubmit={handleSubmit}>
+          <input
+            onChange={e => setMovieToFind(e.target.value)}
+            className={styles.SearchFormInput}
+            type="text"
+            autoComplete="off"
+            autoFocus
+            placeholder="Search movie"
+            value={movieToFind}
+          />
+          <button type="submit" className={styles.searchFormButton}>
+            search
+          </button>
+        </form>
+      </header>
+      {movies.length > 0 &&
+        movies.map(({ id, title, poster_path }) => (
+          <ul>
+            <li key={id}>
+              <Link
+                to={{
+                  pathname: `/movies/${`${id}`}`,
+                  state: {
+                    from: {
+                      location,
+                    },
+                  },
+                }}
+              >
+                <img
+                  src={
+                    poster_path
+                      ? `https://image.tmdb.org/t/p/w300${poster_path}`
+                      : 'https://m.media-amazon.com/images/I/51dCwRZxtLL.jpg'
+                  }
+                  alt={title}
+                />
+                <p>{title}</p>
+              </Link>
+            </li>
+          </ul>
+        ))}
+    </>
   );
-}
+};
+
+export default MoviesPage;
