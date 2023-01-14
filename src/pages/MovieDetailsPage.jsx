@@ -1,119 +1,108 @@
-import { useEffect, useState, lazy, Suspense, useRef } from 'react';
+import Loader from 'components/Loader/Loader';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import {
-  Route,
   useParams,
-  useRouteMatch,
   NavLink,
+  useRouteMatch,
   useLocation,
   useHistory,
+  Switch,
+  Route,
 } from 'react-router-dom';
+import { getMovieById, IMAGE_URL } from '../services/MoviesApi';
+import styles from './MovieDetailsPage.module.css';
 
-import * as MoviesAPI from '../services/MoviesApi';
-import MovieItem from '../components/MovieItem/MovieItem';
-import Spinner from '../components/Spinner/Spinner';
-import Modal from '../components/Modal/Modal';
-// import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
-import './styles/MovieDetailsPage.scss';
-
-const Trailer = lazy(() =>
-  import('../components/Trailer/Trailer'),
+const MovieReview = lazy(() =>
+  import('./MovieReview' /* webpackChunkName:"MovieReview" */)
 );
-
-const CastView = lazy(() =>
-  import('./CastPage'),
-);
-const Reviews = lazy(() =>
-  import('./ReviewsPage'),
+const MovieCastView = lazy(() =>
+  import('./MovieCastView' /* webpackChunkName:"MovieCastView" */)
 );
 
 export default function MovieDetailsPage() {
   const [movie, setMovie] = useState(null);
-  const [modal, setModal] = useState(false);
-
   const { movieId } = useParams();
-  const { url, path } = useRouteMatch();
-  const location = useLocation();
-  const refLocation = useRef(location);
   const history = useHistory();
+  const location = useLocation();
+  const { url, path } = useRouteMatch();
 
   useEffect(() => {
-    MoviesAPI.fetchMovieDetais(movieId).then(setMovie);
+    const getMovie = async () => {
+      const currentMovie = await getMovieById(movieId);
 
-    return () => {
-      setMovie(null);
+      setMovie(currentMovie);
     };
+
+    getMovie();
   }, [movieId]);
 
-  function goBack() {
-    if (refLocation.current.state) {
-      const { pathname, search } = refLocation.current.state.from;
-      history.push(search ? pathname + search : pathname);
-    } else {
-      const path = refLocation.current.pathname.includes('movies')
-        ? '/movies'
-        : '/';
-      history.push(path);
-    }
-  }
-
-  function toggleModal() {
-    setModal(state => !state);
-  }
+  const onGoBack = () => {
+    history.push(location?.state?.from?.location ?? '/movies');
+  };
 
   return (
     <>
-      {movie && (
+      {!movie ? (
+        <div className={styles.notFound}>This movie is not found</div>
+      ) : (
         <>
-          <div className="button-box">
-            <button type="button" onClick={goBack} className="back-btn">
-              Go back
-            </button>
-            <button
-              type="button"
-              data-id={movieId}
-              className="trailer-btn"
-              onClick={toggleModal}
-            >
-              Trailer
-            </button>
+          <button type="button" onClick={onGoBack}>
+            Go back
+          </button>
+          <div className={styles.movieContainer}>
+            <div className={styles.movieImg}>
+              <img
+                src={
+                  movie.poster_path
+                    ? IMAGE_URL + movie.poster_path
+                    : `https://bitsofco.de/content/images/2018/12/broken-1.png`
+                }
+                alt={movie.title}
+                widht=""
+                height=""
+              />
+            </div>
+
+            <div>
+              <h2>{movie.title}</h2>
+              <p>User Score: {`${movie.vote_average * 10}`}%</p>
+              <h3>Overview</h3>
+              <p>{`${movie.overview}`}</p>
+              <h3>Genres</h3>
+              <p>{`${movie.genres.map(genre => genre.name).join(' / ')}`}</p>
+            </div>
           </div>
-          <MovieItem movie={movie} />
         </>
       )}
-
-      {modal && (
-        <Modal onClose={toggleModal}>
-          <Suspense fallback={<Spinner />}>
-            <Trailer id={movieId} />
-          </Suspense>
-        </Modal>
-      )}
-
-      <div className="details-box">
+      <hr />
+      <p>Additional information</p>
+      <nav>
         <NavLink
-          to={`${url}/cast`}
-          className="movie-link"
-          activeClassName="active-link"
+          to={{ pathname: `${url}/cast`, state: location.state }}
+          className={styles.link}
+          activeClassName={styles.active}
         >
           Cast
         </NavLink>
         <NavLink
-          to={`${url}/reviews`}
-          className="movie-link"
-          activeClassName="active-link"
+          to={{ pathname: `${url}/reviews`, state: location.state }}
+          className={styles.link}
+          activeClassName={styles.active}
         >
           Reviews
         </NavLink>
-      </div>
+      </nav>
 
-      <Suspense fallback={<Spinner />}>
-        <Route path={`${path}/cast`} exact>
-          <CastView />
-        </Route>
+      <Suspense fallback={<Loader />}>
+        <Switch>
+          <Route path={`${path}/cast`}>
+            <MovieCastView movieId={movieId} />
+          </Route>
 
-        <Route path={`${path}/reviews`} exact>
-          <Reviews />
-        </Route>
+          <Route path={`${path}/reviews`}>
+            <MovieReview movieId={movieId} />
+          </Route>
+        </Switch>
       </Suspense>
     </>
   );
