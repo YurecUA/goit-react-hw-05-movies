@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+export const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
 const instanceMovie = axios.create({
   baseURL: 'https://api.themoviedb.org/3/',
   params: {
@@ -33,4 +34,14 @@ export const getMovieByQuery = async query => {
 export const getMovieById = async movie_id => {
   const { data } = await instanceMovie.get(`/movie/${movie_id}`);
   return data;
+};
+
+export const getMovieCast = async id => {
+  const { data } = await axios.get(`movie/${id}/credits`);
+  return data.cast;
+};
+
+export const getMovieReviews = async id => {
+  const { data } = await axios.get(`movie/${id}/reviews`);
+  return data.results;
 };
