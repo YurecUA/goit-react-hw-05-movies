@@ -8,7 +8,6 @@ export default function MovieCastView() {
   useEffect(() => {
     const getCast = async () => {
       const cast = await getMovieCast(movieId);
-      console.log(cast);
       setCast(cast);
     };
 
