@@ -2,10 +2,9 @@ import styles from './MoviesPage.module.css';
 
 import { useState, useEffect } from 'react';
 import { getMovieByQuery } from '../services/MoviesApi';
-import { Link, useLocation, useSearchParams} from 'react-router-dom';
-import Notiflix from 'notiflix';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 
-const MoviesPage = () => {
+export default function MoviesPage() {
   const [movieToFind, setMovieToFind] = useState('');
   const [movies, setMovies] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -51,33 +50,28 @@ const MoviesPage = () => {
           </button>
         </form>
       </header>
-      {movies.length > 0 &&
-        <ul> {movies.map(
-          ({
-            id,
-            title,
-
-          }) => (
-
-              <li key={id}>
-                <Link
-                  to={{
-                    pathname: `/movies/${`${id}`}`,
-                    state: {
-                      from: {
-                        location,
-                        label: 'Back to Home',
-                      },
+      {movies.length > 0 && (
+        <ul>
+          {' '}
+          {movies.map(({ id, title }) => (
+            <li key={id}>
+              <Link
+                to={{
+                  pathname: `/movies/${`${id}`}`,
+                  state: {
+                    from: {
+                      location,
+                      label: 'Back to Home',
                     },
-                  }}
-                >
-                  <p>{title}</p>
-                </Link>
-              </li>
-          )
-        )} </ul>}
+                  },
+                }}
+              >
+                <p>{title}</p>
+              </Link>
+            </li>
+          ))}{' '}
+        </ul>
+      )}
     </>
   );
-};
-
-export default MoviesPage;
+}
