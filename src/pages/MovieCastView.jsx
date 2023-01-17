@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { getMovieCast, IMAGE_URL } from '../services/MoviesApi';
-import PropTypes from 'prop-types';
 import { useParams } from 'react-router-dom';
 
 export default function MovieCastView() {
