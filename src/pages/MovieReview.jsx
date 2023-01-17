@@ -8,7 +8,6 @@ export default function MovieReview() {
   useEffect(() => {
     const getCast = async () => {
       const results = await getMovieReviews(movieId);
-      console.log(results);
       setReviews(results);
     };
     getCast();
