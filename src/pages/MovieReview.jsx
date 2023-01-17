@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { getMovieReviews } from '../services/MoviesApi';
-import PropTypes from 'prop-types';
 import { useParams } from 'react-router-dom';
 
 export default function MovieReview() {
@@ -11,7 +10,6 @@ export default function MovieReview() {
       const results = await getMovieReviews(movieId);
       console.log(results);
       setReviews(results);
-
     };
     getCast();
   }, [movieId]);
