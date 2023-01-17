@@ -18,8 +18,6 @@ export default function MoviesPage() {
 
         setMovies(results);
         setMovieToFind(searchString);
-
-        console.log(searchString);
       };
 
       getMovies();
