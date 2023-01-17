@@ -2,29 +2,18 @@ import Loader from 'components/Loader/Loader';
 import { useState, useEffect, lazy, Suspense } from 'react';
 import {
   useParams,
-  NavLink,
-  useRouteMatch,
+  Link,
+  Outlet,
   useLocation,
-  useHistory,
-  Switch,
-  Route,
 } from 'react-router-dom';
 import { getMovieById, IMAGE_URL } from '../services/MoviesApi';
 import styles from './MovieDetailsPage.module.css';
 
-const MovieReview = lazy(() =>
-  import('./MovieReview' /* webpackChunkName:"MovieReview" */)
-);
-const MovieCastView = lazy(() =>
-  import('./MovieCastView' /* webpackChunkName:"MovieCastView" */)
-);
-
 export default function MovieDetailsPage() {
   const [movie, setMovie] = useState(null);
   const { movieId } = useParams();
-  const history = useHistory();
+
   const location = useLocation();
-  const { url, path } = useRouteMatch();
 
   useEffect(() => {
     const getMovie = async () => {
@@ -37,7 +26,7 @@ export default function MovieDetailsPage() {
   }, [movieId]);
 
   const onGoBack = () => {
-    history.push(location?.state?.from?.location ?? '/movies');
+    return location?.state?.from ?? '/movies';
   };
 
   return (
@@ -46,9 +35,9 @@ export default function MovieDetailsPage() {
         <div className={styles.notFound}>This movie is not found</div>
       ) : (
         <>
-          <button type="button" onClick={onGoBack}>
+          <Link to={onGoBack()}>
             Go back
-          </button>
+          </Link>
           <div className={styles.movieContainer}>
             <div className={styles.movieImg}>
               <img
@@ -77,23 +66,22 @@ export default function MovieDetailsPage() {
       <hr />
       <p>Additional information</p>
       <nav>
-        <NavLink
-          to={{ pathname: `${url}/cast`, state: location.state }}
+        <Link
+          to='cast'
           className={styles.link}
-          activeClassName={styles.active}
         >
           Cast
-        </NavLink>
-        <NavLink
-          to={{ pathname: `${url}/reviews`, state: location.state }}
+        </Link>
+        <Link
+          to='reviews'
           className={styles.link}
-          activeClassName={styles.active}
         >
           Reviews
-        </NavLink>
+        </Link>
       </nav>
+      <Outlet />
 
-      <Suspense fallback={<Loader />}>
+      {/* <Suspense fallback={<Loader />}>
         <Switch>
           <Route path={`${path}/cast`}>
             <MovieCastView movieId={movieId} />
@@ -103,7 +91,7 @@ export default function MovieDetailsPage() {
             <MovieReview movieId={movieId} />
           </Route>
         </Switch>
-      </Suspense>
+      </Suspense> */}
     </>
   );
 }

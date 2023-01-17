@@ -20,14 +20,13 @@ const HomePage = () => {
     <>
       <h1>Trending today</h1>
 
-      {movies &&
-        movies.map(
+      {movies && <ul> {movies.map(
           ({
             id,
             title,
 
           }) => (
-            <ul>
+
               <li key={id}>
                 <Link
                   to={{
@@ -43,9 +42,8 @@ const HomePage = () => {
                   <p>{title}</p>
                 </Link>
               </li>
-            </ul>
           )
-        )}
+        )} </ul>}
     </>
   );
 };

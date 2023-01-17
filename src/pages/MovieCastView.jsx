@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { getMovieCast, IMAGE_URL } from '../services/MoviesApi';
 import PropTypes from 'prop-types';
+import { useParams } from 'react-router-dom';
 
-export default function MovieCastView({ movieId }) {
+export default function MovieCastView() {
   const [cast, setCast] = useState([]);
-
+  const { movieId } = useParams();
   useEffect(() => {
     const getCast = async () => {
-      const { cast } = await getMovieCast(movieId);
+      const cast = await getMovieCast(movieId);
+      console.log(cast);
       setCast(cast);
     };
 
@@ -36,7 +38,3 @@ export default function MovieCastView({ movieId }) {
     </ul>
   );
 }
-
-MovieCastView.propTypes = {
-  movieId: PropTypes.string.isRequired,
-};

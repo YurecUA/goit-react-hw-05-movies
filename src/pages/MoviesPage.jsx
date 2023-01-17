@@ -2,19 +2,17 @@ import styles from './MoviesPage.module.css';
 
 import { useState, useEffect } from 'react';
 import { getMovieByQuery } from '../services/MoviesApi';
-import { Link, useLocation, useHistory } from 'react-router-dom';
+import { Link, useLocation, useSearchParams} from 'react-router-dom';
 import Notiflix from 'notiflix';
 
 const MoviesPage = () => {
   const [movieToFind, setMovieToFind] = useState('');
   const [movies, setMovies] = useState([]);
-
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchString = searchParams.get('query') ?? '';
   const location = useLocation();
-  const history = useHistory();
 
   useEffect(() => {
-    const searchString = new URLSearchParams(location.search).get('query');
-
     if (searchString) {
       const getMovies = async () => {
         const { results } = await getMovieByQuery(searchString);
@@ -27,28 +25,12 @@ const MoviesPage = () => {
 
       getMovies();
     }
-  }, [location.search]);
+  }, [searchString]);
 
   const handleSubmit = async e => {
     e.preventDefault();
-
-    if (movieToFind.trim()) {
-      const { results } = await getMovieByQuery(movieToFind);
-
-      setMovies(results);
-      setMovieToFind('');
-
-      if (results.length === 0) {
-        Notiflix.Notify.warning(
-          'No movies found! Please change your request and try again'
-        );
-      }
-
-      history.push({
-        ...location,
-        search: `query=${movieToFind}`,
-      });
-    }
+    setSearchParams({ query: movieToFind });
+    setMovieToFind('');
   };
 
   return (
@@ -70,32 +52,30 @@ const MoviesPage = () => {
         </form>
       </header>
       {movies.length > 0 &&
-        movies.map(({ id, title, poster_path }) => (
-          <ul>
-            <li key={id}>
-              <Link
-                to={{
-                  pathname: `/movies/${`${id}`}`,
-                  state: {
-                    from: {
-                      location,
+        <ul> {movies.map(
+          ({
+            id,
+            title,
+
+          }) => (
+
+              <li key={id}>
+                <Link
+                  to={{
+                    pathname: `/movies/${`${id}`}`,
+                    state: {
+                      from: {
+                        location,
+                        label: 'Back to Home',
+                      },
                     },
-                  },
-                }}
-              >
-                <img
-                  src={
-                    poster_path
-                      ? `https://image.tmdb.org/t/p/w300${poster_path}`
-                      : 'https://m.media-amazon.com/images/I/51dCwRZxtLL.jpg'
-                  }
-                  alt={title}
-                />
-                <p>{title}</p>
-              </Link>
-            </li>
-          </ul>
-        ))}
+                  }}
+                >
+                  <p>{title}</p>
+                </Link>
+              </li>
+          )
+        )} </ul>}
     </>
   );
 };
