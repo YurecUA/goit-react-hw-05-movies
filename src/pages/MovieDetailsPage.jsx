@@ -1,11 +1,5 @@
-import Loader from 'components/Loader/Loader';
-import { useState, useEffect, lazy, Suspense } from 'react';
-import {
-  useParams,
-  Link,
-  Outlet,
-  useLocation,
-} from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, Link, Outlet, useLocation } from 'react-router-dom';
 import { getMovieById, IMAGE_URL } from '../services/MoviesApi';
 import styles from './MovieDetailsPage.module.css';
 
@@ -35,9 +29,7 @@ export default function MovieDetailsPage() {
         <div className={styles.notFound}>This movie is not found</div>
       ) : (
         <>
-          <Link to={onGoBack()}>
-            Go back
-          </Link>
+          <Link to={onGoBack()}>Go back</Link>
           <div className={styles.movieContainer}>
             <div className={styles.movieImg}>
               <img
@@ -66,32 +58,14 @@ export default function MovieDetailsPage() {
       <hr />
       <p>Additional information</p>
       <nav>
-        <Link
-          to='cast'
-          className={styles.link}
-        >
+        <Link to="cast" className={styles.link}>
           Cast
         </Link>
-        <Link
-          to='reviews'
-          className={styles.link}
-        >
+        <Link to="reviews" className={styles.link}>
           Reviews
         </Link>
       </nav>
       <Outlet />
-
-      {/* <Suspense fallback={<Loader />}>
-        <Switch>
-          <Route path={`${path}/cast`}>
-            <MovieCastView movieId={movieId} />
-          </Route>
-
-          <Route path={`${path}/reviews`}>
-            <MovieReview movieId={movieId} />
-          </Route>
-        </Switch>
-      </Suspense> */}
     </>
   );
 }
